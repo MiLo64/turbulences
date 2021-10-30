@@ -18,23 +18,9 @@ import time
 import scipy.signal as sc
 import pickle 
 import matplotlib.animation as animation
-
 import os
-
-%matplotlib notebook  
-
-
-#plt.rcParams.update({'font.size': 22})
-
-def calibration_hot_wire(A,B,e):
-    #Warning : La fonction commentée ci-dessous n'est pas bonne, il faut prendre l'inverse !
-    #A vous de jouer !
-    return ((e**2-A)**2)/B
-    print("PROBLEM DANS CALIBRATION8HOT8WIRE")
-    dsdssd;
     
-    
-    def aquire(timeout):    
+def aquire(timeout):    
     conversion_fp = 1/22.27 #Bar/V (do not change)
     calib_A =1.052 # a déterminer et a faire tourner
     calib_B =0.585 # a determiner et a faire tourner
@@ -49,22 +35,17 @@ def calibration_hot_wire(A,B,e):
     if not os.path.exists(folder):
         os.makedirs(folder)
 
-    number = 4
-    #field_name = "velocity" 
+    number = 1 
     field_name = "pressure"
 
     """ Options of acquisition """
-    #timeout =2#acquisition time in second
     num = 1 # number of recorded channels - do not change
     dev = "Dev7" # moniteur de périphérique : entrée USB
     df = 5000.0 # acquisition frequency 
     channel = "/ai0"
 
-
     """ Recording part """
-    #name = field_name+str(timeout)+'s'+str(number)+".pkl" # field_name + acquis_time + number of measure (signal/ bruit)
     name = field_name+str(number)+".pkl" # name -> profile de vitesse, fluctuation de pressions...
-
 
     deltaT = int(timeout*int(df))
     data = np.zeros((deltaT*num,), dtype=np.float64)
@@ -73,7 +54,6 @@ def calibration_hot_wire(A,B,e):
     delay = 5 # delay before reading the data (DO NOT CHANGE)
 
     #nidaq mode
-    #mode = "differential"
     mode = "single-ended"
 
     if mode == "default":
@@ -94,7 +74,6 @@ def calibration_hot_wire(A,B,e):
     tt=time.time()
 
     # DAQmx Read Code
-    # analog_input.ReadAnalogF64(deltaT,deltaT,nidaq.DAQmx_Val_GroupByChannel,data,deltaT,nidaq.byref(read),None) #DAQmx_Val_GroupByChannel
     analog_input.ReadAnalogF64(deltaT,timeout+delay,nidaq.DAQmx_Val_GroupByChannel,data,len(data),nidaq.byref(read),None) #DAQmx_Val_GroupByChannel
 
 
@@ -119,31 +98,13 @@ def calibration_hot_wire(A,B,e):
     plt.grid()
     plt.title(channel)
     plt.show()
-    #print(np.mean(data_))
-    #print(np.std(data_))
 
     """ Recording the data in the labtop """
 
     with open(folder+name, "wb") as fp:   #Pickling
         pickle.dump(data_, fp)
-    
-    #hist, bin = np.histogram(data_, 40)
-    #print(hist)
-    #print(bin)
-    
-    #plt.figure()
-    #plt.semilogy(bin[:-1], hist)
-    #plt.grid()
-    #plt.title(channel)
-    #plt.show()
-    
-    #plt.figure()
-    #plt.plot(bin[:-1], hist)
-    #plt.grid()
-    #plt.title(channel)
-    #plt.show()
-    
-    return data_
+        
+    return np.std(data_)
 
 def iterate(N, time):
     std_list = []
@@ -162,7 +123,7 @@ def iterate(N, time):
     return std_mean, perr
     
     
-    # Let's see the evolution of the std_mean when we increase the timeout
+# Let's see the evolution of the std_mean when we increase the timeout
 
 std_mean_list = []
 perr_list = []
@@ -211,13 +172,6 @@ plt.figure()
 plt.plot(fv,psd_v)
 plt.show()
 
-
-#def f(x,a,b):
-    #return a*x+b
-#import scipy.optimize
-#p_opt,y=scipy.optimize.curve_fit(f,np.log10(fv[30:-10]),np.log10(psd_v[30:-10]),[1,1])
-#print(p_opt)
-
 plt.loglog(fv,psd_v)
 plt.show()
 
@@ -235,12 +189,6 @@ with open("psd_4.5_volt", "w")as fil:
 with open("data_4.5_volt_600.txt", "w")as fichier:
     for item in data_:
         fichier.write(f"{item}"+" ")
-        
-
-
-
-
-import matplotlib.pyplot
 
 def interval(data, seuil):
     stock = 0
